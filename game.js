@@ -60,7 +60,7 @@ angular.module('myApp',
 				else{
 					$window.document.getElementById("gamemsg").innerHTML = "Game over, Ties";
 				}
-				$window.document.getElementById("alertbox").style.display = "block";
+				setTimeout(function(){$window.document.getElementById("alertbox").style.display = "block";}, 1000);
 			}
     }
     $scope.placeDot  = function(str){
