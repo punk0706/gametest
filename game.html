@@ -11,11 +11,17 @@
   <script src="gameLogic.js"></script>
   <script src="messageService.js"></script>
   <script src="scaleBodyService.js"></script>
+  <script>
+  function startNewGame(){
+  location.reload();
+  };
+  </script>
   <!-- for local testing purposes ! -->
   <script src="http://yoav-zibin.github.io/emulator/platform.js"></script>
   <link rel="stylesheet" type="text/css" href="game.css">
 </head>
 <body ng-controller="Ctrl">
+	<div id="container">
   <table>
     <tr ng-repeat="row in board track by $index">
       <td ng-repeat="cell in row track by $index"
@@ -25,5 +31,10 @@
       </td>
     </tr>
   </table>
+  <div id="alertbox">
+  	<p id="gamemsg"></p>
+  	<button onclick="startNewGame()" style="width:200px; height:40px; font-size: 20px">Start New Game</button>
+  </div>
+  </div>
 </body>
 </html>

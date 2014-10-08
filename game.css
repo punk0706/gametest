@@ -1,5 +1,27 @@
 table {
   border-collapse: collapse;
+  border: none;
+  margin: 0px;
+  padding: 0px;
+}
+#container{
+	position: relative;
+}
+#alertbox{
+	position: absolute;
+	left:300px;
+	top: 100px;
+	width: 600px;
+	text-align:center;
+	font-size: 60px;
+	color: white;
+	display: none;
+	
+}
+tr{
+	border: none;
+  margin: 0px;
+  padding: 0px;
 }
 body {
   margin: 0px;
@@ -17,7 +39,9 @@ body {
   padding: 0px;
 }
 .stone{
-	margin-top: 1px;
+	width:79px;
+	height:79px;
+	display: block;
 }
 .dark {
   background-image: url(img/boardDark.png);
