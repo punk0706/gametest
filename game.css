@@ -1,0 +1,27 @@
+table {
+  border-collapse: collapse;
+}
+body {
+  margin: 0px;
+  padding: 0px;
+}
+.cell {
+  text-align:center;
+  vertical-align: middle;
+  font-family: "Helvetica";
+  font-size: 30pt;
+  width: 80px;
+  height: 80px;
+  border: none;
+  margin: 0px;
+  padding: 0px;
+}
+.stone{
+	margin-top: 1px;
+}
+.dark {
+  background-image: url(img/boardDark.png);
+}
+.light {
+  background-image: url(img/boardLight.png);
+}
