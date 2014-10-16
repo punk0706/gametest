@@ -3,9 +3,8 @@ angular.module('myApp', ['ngTouch','ngDragDrop','myApp.aiService'])
   .controller('Ctrl', function (
       $window, $scope, $log, $timeout,
       aiService, gameService, scaleBodyService, gameLogic) {
-       var moveAudio = new Audio('audio/button-26.wav');
+       var moveAudio = new Audio('audio/move.wav');
     moveAudio.load();
-    var isLocalTesting = $window.parent === $window;
     function updateUI(params) {
       $scope.board = params.stateAfterMove.board;
       $scope.delta = params.stateAfterMove.delta;
@@ -49,15 +48,15 @@ angular.module('myApp', ['ngTouch','ngDragDrop','myApp.aiService'])
         }
         $scope.newMove = aimove;
         gameService.makeMove(gameLogic.createMove($scope.board, aimove[0], aimove[1], $scope.turnIndex));
-        var isFinished = updateMessage(gameLogic.createMove($scope.board, aimove[0], aimove[1], $scope.turnIndex));
+        $scope.isFinished = updateMessage(gameLogic.createMove($scope.board, aimove[0], aimove[1], $scope.turnIndex));
         aiService.informingComputer(aimove[0], aimove[1], 'white');
-        $timeout(updateAIStatues(isFinished), 500);
+        $timeout(updateAIStatues, 500);
         $scope.numOfMoves++;
     }
-    function updateAIStatues(isFinished){
+    function updateAIStatues(){
         $scope.isAiWorking = false;
-        if (!isFinished){
-        $window.document.getElementById("gamemsg").innerHTML = "Black's turn";
+        if (!$scope.isFinished){
+        	$window.document.getElementById("gamemsg").innerHTML = "Black's turn";
         }
     }
     updateUI({stateAfterMove: {}, turnIndexAfterMove: 0, yourPlayerIndex: -2});
