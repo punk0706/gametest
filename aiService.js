@@ -1,4 +1,5 @@
-//A major part of the following code was adopted from yjyao.com/2012/06/gomoku-in-html5.html
+/*A major part of the following code was adopted from yjyao.com
+*/
 'use strict';
 angular.module('myApp.aiService', []).service('aiService', function() {
 function mapPoint(r,c){
