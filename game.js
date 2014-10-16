@@ -49,10 +49,23 @@ angular.module('myApp',
       } else {
         messageService.sendMessage({makeMove: move});
       }
+      if('endMatch' in move[0]){
+				var score = move[0].endMatch.endMatchScores;
+				if(score[0] > score[1]){
+					$window.document.getElementById("gamemsg").innerHTML = "Game over, Black Wins";
+				}
+				else if(score[0] < score[1]){
+					$window.document.getElementById("gamemsg").innerHTML = "Game over, White Wins";
+				}
+				else{
+					$window.document.getElementById("gamemsg").innerHTML = "Game over, Ties";
+				}
+				setTimeout(function(){$window.document.getElementById("alertbox").style.display = "block";}, 1000);
+			}
     }
     $scope.placeDot  = function(str){
     if(str ===''){
-    	return '';
+    	return 'img/empty.png';
     }
     if(str === 'X'){
     	return 'img/blackStone.png';
