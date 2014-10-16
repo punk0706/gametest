@@ -162,10 +162,12 @@ angular.module('myApp', ['ngTouch','ngDragDrop','myApp.aiService'])
         $scope.newMove = [row, col];
         $scope.isYourTurn = false; // to prevent making another move
         gameService.makeMove(move);
-        updateMessage(move);
+        $scope.isFinished = updateMessage(move);
         $scope.numOfMoves++;
         aiService.informingComputer(row, col, 'black');
+        if(!$scope.isFinished){
         $window.document.getElementById("gamemsg").innerHTML = "AI thinking...";
+        }
         }
         else{
         	return false;
