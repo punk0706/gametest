@@ -4,7 +4,7 @@
 //I have implemented a simple HTML UI in the test.html and you can test the game logic by actually play the game thru the UI
 //The following code was tested and confirmed functionality by pasting and running in google chrome console
 'use strict';
-angular.module('myApp.gameLogic', []).service('gameLogic', function() {
+angular.module('myApp').service('gameLogic', function() {
 function isEqual(object1, object2) {
 return JSON.stringify(object1) === JSON.stringify(object2);
 }
