@@ -34,7 +34,7 @@ angular.module('myApp', ['ngTouch'])
     	$scope.isYourTurn = params.turnIndexAfterMove >= 0 && // game is ongoing
         params.yourPlayerIndex === params.turnIndexAfterMove; // it's my turn
         $scope.turnIndex = params.turnIndexAfterMove;
-        if ($scope.isYourTurn && params.yourPlayerIndex === 1) {
+        if ($scope.isYourTurn && params.playersInfo[params.yourPlayerIndex].playerId === '') {
         // Wait 500 milliseconds until animation ends.
         	$timeout(sendComputerMove, 600);
       	}
