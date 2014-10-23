@@ -1,7 +1,5 @@
-/*A major part of the following code was adopted from yjyao.com
-*/
 'use strict';
-angular.module('myApp.aiService', []).service('aiService', function() {
+angular.module('myApp').service('aiService', function() {
 function mapPoint(r,c){
     this.r=r;
     this.c=c;

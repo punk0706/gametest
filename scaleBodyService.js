@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('myApp.scaleBodyService', [])
+angular.module('myApp')
   .service('scaleBodyService', function($window, $log) {
     var doc = $window.document;
     var body = doc.body;
@@ -16,26 +16,26 @@ angular.module('myApp.scaleBodyService', [])
       if (gameSize === null) {
         return;
       }
-      $log.info(["Scaling the body to size: ", gameSize]);
       var myGameWidth = gameSize.width;
       var myGameHeight = gameSize.height;
       var windowWidth = $window.innerWidth;
       var windowHeight = $window.innerHeight;
       if (oldSizes !== null) {
-        if (oldSizes.myGameWidth === myGameWidth && 
-            oldSizes.myGameHeight === myGameHeight && 
-            oldSizes.windowWidth === windowWidth && 
+        if (oldSizes.myGameWidth === myGameWidth &&
+            oldSizes.myGameHeight === myGameHeight &&
+            oldSizes.windowWidth === windowWidth &&
             oldSizes.windowHeight === windowHeight) {
           return; // nothing changed, so no need to change the transformations.
         }
       }
+      $log.info(["Scaling the body to size: ", gameSize]);
       oldSizes = {
-          myGameWidth: myGameWidth, 
-          myGameHeight: myGameHeight, 
-          windowWidth: windowWidth, 
+          myGameWidth: myGameWidth,
+          myGameHeight: myGameHeight,
+          windowWidth: windowWidth,
           windowHeight: windowHeight
       };
-      
+
       var scaleX = windowWidth / myGameWidth;
       var scaleY = windowHeight / myGameHeight;
       var scale = Math.min(scaleX, scaleY);
@@ -59,6 +59,6 @@ angular.module('myApp.scaleBodyService', [])
     $window.onorientationchange = rescale;
     doc.addEventListener("orientationchange", rescale);
     setInterval(rescale, 1000);
-    
+
     this.scaleBody = scaleBody;
   });

@@ -1,7 +1,8 @@
 'use strict';
-angular.module('myApp', ['ngTouch','ngDragDrop','myApp.aiService'])
+
+angular.module('myApp', ['ngTouch'])
   .controller('Ctrl', function (
-      $window, $scope, $log, $timeout,
+       $window, $scope, $log, $timeout,
       aiService, gameService, scaleBodyService, gameLogic) {
        var moveAudio = new Audio('audio/move.wav');
     moveAudio.load();
