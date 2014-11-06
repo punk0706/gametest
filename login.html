@@ -1,0 +1,13 @@
+﻿<div>
+	<div><img src={{avatarImageUrl}} alt="HTML5 Icon" width="50" height="50"></div>
+	<div><textarea ng-model="displayName" rows=1 cols=20 readonly></textarea></div>
+    <div><select id="gameList" class="nullable" ng-options="game.gameId as game.gameName for game in availableGames"  ng-model="selectedGame" ng-change="gameSelected()">
+      <option value="">Please select a game from list</option>
+    </select></div>
+    <div style="height : 50%; width : 80%">
+    	<tabset vertical="true" type="pills">
+    <tab heading="Vertical 1">Vertical content 1</tab>
+    <tab heading="Vertical 2">Vertical content 2</tab>
+  </tabset>
+    </div>
+</div>
