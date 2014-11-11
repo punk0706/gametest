@@ -1,15 +1,15 @@
 <div class="startDiv">
 	<div style="position:relative;top:10%;display:block;">
-		<div class="centerItem" style="width:70%;height70%">
-    		<tabset justified="true" style="width:100%;height:100%;font-size:80%">
-    			<tab heading="Match List">
+		<div class="centerItem" style="width:70%;height70%;">
+    		<tabset justified="true">
+    			<tab heading="Match List" >
     				<br />
-    				<div class="centerItem" ng-repeat="match in theMatchList" style="position:relative;">
+    				<div style="width:100%;height:500px;font-size:80%;overflow:auto;">
+    				<div class="centerItem" ng-model="btTest" ng-repeat="test in btTest" style="position:relative;width:90%;height15%;">
+    				<button class="btn btn-default btn-sm" style="width:100%;">{{test.o}}</button>
+    				<div>&nbsp;</div>
 					</div>
-					<tabset vertical="true" type="pills">
-    					<tab heading="Vertical 1">Vertical content 1</tab>
-    					<tab heading="Vertical 2">Vertical content 2</tab>
-  					</tabset>
+					</div>
     			</tab>	
     			<tab heading="Current Game">
     				<br />

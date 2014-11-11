@@ -28,9 +28,8 @@ angular.module('myApp')
       var myGameHeight = gameSize.height;
       var windowWidth = $window.innerWidth;
       var windowHeight = $window.innerHeight;
-      if(windowHeight < 628){
-      	windowWidth = 414;
-      	windowHeight = 628;
+      if(windowHeight < 460){
+      	windowHeight = 460;
       }
       if (oldSizes !== null) {
         if (oldSizes.myGameWidth === myGameWidth &&

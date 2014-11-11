@@ -41,7 +41,7 @@ myApp.config(['$routeProvider', '$locationProvider',
 ])
 myApp.controller('routeCtrl',
   function($route, $routeParams, $location, $scope, $rootScope, $log, $window, platformMessageService, stateService, serverApiService, platformScaleService, interComService) {
-  	platformScaleService.scaleBody({width: 768, height: 1024});
+  	platformScaleService.scaleBody({width: 320, height: 460});
     this.$route = $route;
     this.$location = $location;
     this.$routeParams = $routeParams;
@@ -174,6 +174,7 @@ myApp.controller('modeCtrl', function($routeParams, $location, $scope, $rootScop
   if (interComService.getUser() === undefined || interComService.getGame() === undefined){
   	$location.path('/');
   }
+  $scope.btTest = [{o:1},{o:2},{o:3},{o:4},{o:5},{o:6},{o:7},{o:8},{o:9},{o:10},{o:10}, {o:10}, {o:10}, {o:10}, {o:10}, {o:10}, {o:10}, {o:10}, {o:10}, {o:10}];
   var theGame = interComService.getGame();
   var thePlayer = interComService.getUser();
   var theMatchList = [];
@@ -223,7 +224,7 @@ myApp.controller('modeCtrl', function($routeParams, $location, $scope, $rootScop
   	for(var i = 0; i < matches.length; i++){
   		theMatchList.push(matches[i]);
   	}
-  	$scope.theMatchListJson = angular.toJson(theMatchList, true);
+  	//$scope.theMatchListJson = angular.toJson(theMatchList, true);
   	$scope.theMatchList = theMatchList;
   };
   
