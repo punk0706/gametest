@@ -65,6 +65,8 @@ myApp.controller('loginCtrl', function($routeParams, $location, $scope, $rootSco
   this.params = $routeParams;
   var playerInfo = null;
   this.playerInfo = playerInfo;
+  $scope.matchDisplayStrings = [];
+  var theMatchList = [];
   getGames();
   $scope.guestLogin = function() {
     var avatarLs = ["bat", "devil", "mike", "scream", "squash"];
@@ -173,13 +175,13 @@ myApp.controller('modeCtrl', function($routeParams, $location, $scope, $rootScop
   this.name = "modeCtrl";
   $scope.matchListStyle = {
   	"width" : "100%",
-  	"height" : Math.floor(($window.innerHeight*0.5)).toString()+"px",
+  	"height" : Math.floor(($window.innerHeight*0.4)).toString()+"px",
   	"overflow": "auto"
   }
   if (interComService.getUser() === undefined || interComService.getGame() === undefined){
   	$location.path('/');
   }
-  $scope.btTest = [{o:1},{o:2},{o:3},{o:4},{o:5},{o:6},{o:7},{o:8},{o:9},{o:10},{o:10}, {o:10}, {o:10}, {o:10}, {o:10}, {o:10}, {o:10}, {o:10}, {o:10}, {o:10}];
+  $scope.btTest = [{o:1},{o:2},{o:3},{o:4},{o:5}, {o:8},{o:9}, {o:10}, {o:10}, {o:10}, {o:10}, {o:10}, {o:10}];
   var theGame = interComService.getGame();
   var thePlayer = interComService.getUser();
   var theMatchList = [];
@@ -222,15 +224,35 @@ myApp.controller('modeCtrl', function($routeParams, $location, $scope, $rootScop
       updateMatchList(resObj);
     } 
   };
-  
+  function matchInfoForDisplay(){
+  	var i ;
+  	var currentMatchInfo =[];
+  	for(i = 0; i < theMatchList.length; i++){
+  		if (theMatchList[i].playersInfo.length > 1){
+  			var matchInfoObj = {
+  								 infoString : theMatchList[i].playersInfo[0].displayName + " vs " + theMatchList[i].playersInfo[1].displayName + " on move " + theMatchList[i].history.moves.length,
+  								 joinable : false,
+  								 matchId : theMatchList[i].matchId
+  								}
+  		}
+  		else if(theMatchList[i].playersInfor.length === 1){
+  			var matchInfoObj = {
+  								 infoString : theMatchList[i].playersInfo[0].displayName + " is awaiting more players.",
+  								 joinable : true,
+  								 matchId : theMatchList[i].matchId
+  								}
+  		}
+  	}
+  }
   function updateMatchList(resObj){
   	//$scope.theMatchList = angular.toJson(resObj);
   	var matches = resObj[0].matches;
   	for(var i = 0; i < matches.length; i++){
   		theMatchList.push(matches[i]);
   	}
+  	matchInfoForDisplay();
   	//$scope.theMatchListJson = angular.toJson(theMatchList, true);
-  	$scope.theMatchList = theMatchList;
+  	//$scope.theMatchList = theMatchList;
   };
   
   function resumeMatch(matchObj){
