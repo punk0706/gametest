@@ -41,7 +41,7 @@ myApp.config(['$routeProvider', '$locationProvider',
 ])
 myApp.controller('routeCtrl',
   function($route, $routeParams, $location, $scope, $rootScope, $log, $window, platformMessageService, stateService, serverApiService, platformScaleService, interComService) {
-  	platformScaleService.scaleBody({width: 320, height: 460});
+  	platformScaleService.scaleBody({width: 320, height: 528});
     this.$route = $route;
     this.$location = $location;
     this.$routeParams = $routeParams;
