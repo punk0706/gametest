@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('myApp', ['ngRoute', 'ngAnimate']).config(function($provide) {
+angular.module('myApp', ['ngRoute', 'ngAnimate', 'ui.bootstrap']).config(function($provide) {
   $provide.decorator("$exceptionHandler", function($delegate) {
     return function(exception, cause) {
       $delegate(exception, cause);
@@ -10,7 +10,7 @@ angular.module('myApp', ['ngRoute', 'ngAnimate']).config(function($provide) {
   });
 });
 
-var myApp = angular.module('myApp', ['ngRoute', 'ngAnimate']);
+var myApp = angular.module('myApp', ['ngRoute', 'ngAnimate', 'ui.bootstrap']);
 myApp.config(['$routeProvider', '$locationProvider',
   function($routeProvider, $locationProvider) {
     $routeProvider
@@ -35,17 +35,32 @@ myApp.config(['$routeProvider', '$locationProvider',
       .when('/game', {
         templateUrl: 'game.html',
         controller: 'gameCtrl'
-      });
+      })
     $locationProvider.html5Mode(true);
   }
 ])
 myApp.controller('routeCtrl',
-  function($route, $routeParams, $location, $scope, $rootScope, $log, $window, platformMessageService, stateService, serverApiService, interComService) {
+  function($route, $routeParams, $location, $scope, $rootScope, $log, $window, platformMessageService, stateService, serverApiService, platformScaleService, interComService) {
+  	platformScaleService.scaleBody({width: 768, height: 1024});
     this.$route = $route;
     this.$location = $location;
     this.$routeParams = $routeParams;
+    $scope.$on("$routeChangeSuccess", function(event, current, previous) {
+        var previousCtrl = previous && previous.$$route && previous.$$route.controller;
+        var currentCtrl = current && current.$$route && current.$$route.controller;
+        if (previousCtrl === "loginCtrl" && (currentCtrl === "modeCtrl" || currentCtrl === "gameCtrl")) {
+            $scope.animationStyle = "slideLeft";
+        } 
+        else if (previousCtrl === "gameCtrl" && (currentCtrl === "loginCtrl" || currentCtrl === "modeCtrl")) {
+            $scope.animationStyle = "slideRight";
+        }
+        if(!$scope.$$phase) {
+          $scope.$apply();
+        }
+    });
   })
-myApp.controller('loginCtrl', function($routeParams, $location, $scope, $rootScope, $log, $window, platformMessageService, stateService, serverApiService, interComService) {
+myApp.controller('loginCtrl', function($routeParams, $location, $scope, $rootScope, $log, $window, platformMessageService, stateService, serverApiService, platformScaleService, interComService) {
+  //platformScaleService.scaleBody(platformScaleService.getGameSize());
   this.name = "loginCtrl";
   this.params = $routeParams;
   var playerInfo = null;
@@ -64,7 +79,30 @@ myApp.controller('loginCtrl', function($routeParams, $location, $scope, $rootSco
     }];
     sendServerMessage('REGISTER_PLAYER', obj);
   };
-  $scope.guestLogin();
+  $scope.updatePlayer = function() {
+    if (typeof(Storage) != "undefined") {
+      playerInfo = angular.fromJson(localStorage.getItem("playerInfo"));
+      //console.log("playerInfo" + localStorage.getItem("playerInfo"));
+    }
+    if (playerInfo != null) {
+      $scope.displayName = playerInfo.displayName;
+      $scope.avatarImageUrl = playerInfo.avatarImageUrl;
+      $scope.myPlayerId = playerInfo.myPlayerId;
+      $scope.myAccessSignature = playerInfo.accessSignature;
+      $scope.myTokens = playerInfo.tokens;
+      var userObj = {
+        displayName: $scope.displayName,
+        playerId: $scope.myPlayerId,
+        accessSignature: $scope.myAccessSignature,
+        avartarUrl: $scope.avatarImageUrl
+      };
+      interComService.setUser(userObj);
+    }
+  }
+  $scope.updatePlayer();
+  if (playerInfo == null) {
+  	$scope.guestLogin();
+  }
 
   function sendServerMessage(t, obj) {
     var type = t;
@@ -101,6 +139,7 @@ myApp.controller('loginCtrl', function($routeParams, $location, $scope, $rootSco
       gamelist.push(g)
     }
     $scope.availableGames = gamelist;
+    interComService.setGameList(gamelist);
   }
 
   function updatePlayerInfo(obj) {
@@ -109,19 +148,6 @@ myApp.controller('loginCtrl', function($routeParams, $location, $scope, $rootSco
     //console.log("playerInfo: " + localStorage.getItem("playerInfo"));
     $scope.updatePlayer();
   };
-  $scope.updatePlayer = function() {
-    if (typeof(Storage) != "undefined") {
-      playerInfo = angular.fromJson(localStorage.getItem("playerInfo"));
-      //console.log("playerInfo" + localStorage.getItem("playerInfo"));
-      if (playerInfo != null) {
-        $scope.displayName = playerInfo.displayName;
-        $scope.avatarImageUrl = playerInfo.avatarImageUrl;
-        $scope.myPlayerId = playerInfo.myPlayerId;
-        $scope.myAccessSignature = playerInfo.accessSignature;
-        $scope.myTokens = playerInfo.tokens;
-      }
-    }
-  }
   $scope.gameSelected = function() {
     console.log("game Selected");
     var i;
@@ -132,13 +158,6 @@ myApp.controller('loginCtrl', function($routeParams, $location, $scope, $rootSco
       }
     }
     if ($scope.myPlayerId !== undefined) {
-      var userObj = {
-        displayName: $scope.displayName,
-        playerId: $scope.myPlayerId,
-        accessSignature: $scope.myAccessSignature,
-        avartarUrl: $scope.avatarImageUrl
-      };
-      interComService.setUser(userObj);
       var gameObj = {
         gameId: $scope.selectedGame,
         gameUrl: $scope.gameUrl,
@@ -150,9 +169,16 @@ myApp.controller('loginCtrl', function($routeParams, $location, $scope, $rootSco
   };
 })
 
-myApp.controller('modeCtrl', function($routeParams, $location, $scope, $rootScope, $log, $window, platformMessageService, stateService, serverApiService, interComService) {
+myApp.controller('modeCtrl', function($routeParams, $location, $scope, $rootScope, $log, $window, platformMessageService, stateService, serverApiService, platformScaleService, interComService) {
   this.name = "modeCtrl";
-  $scope.playMode = "passAndPlay"
+  if (interComService.getUser() === undefined || interComService.getGame() === undefined){
+  	$location.path('/');
+  }
+  var theGame = interComService.getGame();
+  var thePlayer = interComService.getUser();
+  var theMatchList = [];
+
+  $scope.playMode = "playWhite"
   var game = interComService.getGame();
   this.params = $routeParams;
   $scope.$watch('playMode', function() {
@@ -162,24 +188,77 @@ myApp.controller('modeCtrl', function($routeParams, $location, $scope, $rootScop
     interComService.setPlayMode($scope.currentPlayMode);
     $location.path('game');
   }
+
+  getMatchList();
+  
+  function getMatchList(){
+    var resMatchObj = [{
+      getPlayerMatches: {
+        gameId: theGame.gameId,
+        myPlayerId: thePlayer.playerId,
+        getCommunityMatches: false,
+        accessSignature: thePlayer.accessSignature
+      }
+    }];
+    $scope.getPlayerMatches = angular.toJson(resMatchObj, true);
+    sendServerMessage('GET_MATCHES', resMatchObj);
+  };
+
+  function sendServerMessage(t, obj) {
+    var type = t;
+    serverApiService.sendMessage(obj, function(response) {
+      processServerResponse(type, response);
+    });
+  };
+
+  function processServerResponse(type, resObj) {
+    if (type === 'GET_MATCHES') {
+      updateMatchList(resObj);
+    } 
+  };
+  
+  function updateMatchList(resObj){
+  	//$scope.theMatchList = angular.toJson(resObj);
+  	var matches = resObj[0].matches;
+  	for(var i = 0; i < matches.length; i++){
+  		theMatchList.push(matches[i]);
+  	}
+  	$scope.theMatchListJson = angular.toJson(theMatchList, true);
+  	$scope.theMatchList = theMatchList;
+  };
+  
+  function resumeMatch(matchObj){
+  	interComService.setMatch(matchObj);
+    $location.path('game');
+  }
+  $scope.resumeMatch = resumeMatch;
 })
 
 myApp.controller('gameCtrl',
-  function($routeParams, $location, $sce, $scope, $rootScope, $log, $window, platformMessageService, stateService, serverApiService, interComService) {
+  function($routeParams, $location, $sce, $scope, $rootScope, $log, $window, platformMessageService, stateService, serverApiService, platformScaleService, interComService) {
+    if (interComService.getUser() === undefined || interComService.getGame() === undefined){
+  		$location.path('/');
+  	}
     var theGame = interComService.getGame();
     var thePlayer = interComService.getUser();
+    var theMatch = interComService.getMatch();
     $scope.selectedGame = theGame.gameId;
     $scope.myPlayerId = thePlayer.playerId;
     $scope.myAccessSignature = thePlayer.accessSignature;
     $scope.displayName = thePlayer.displayName;
     $scope.avatarImageUrl = thePlayer.avartarUrl;
-    var matchOnGoing = false;
+    $scope.thePlayer = angular.toJson(thePlayer);
+    $scope.theGame = angular.toJson(theGame);
     var myLastMove;
     var myTurnIndex = 0;
     var numOfMove = 0;
     var AutoGameRefresher;
     var myLastState;
-    var myMatchId = "";
+    var matchOnGoing = false;
+    var myMatchId = theMatch.matchId;
+    if(myMatchId !== undefined){
+    	matchOnGoing = true;
+    }
     $scope.playMode = interComService.getMode();
     var playerInfo = null;
     $scope.gameUrl = $sce.trustAsResourceUrl(theGame.gameUrl);
@@ -190,6 +269,15 @@ myApp.controller('gameCtrl',
       if ($scope.playMode == "playAgainstTheComputer") {
         $scope.displayName2 = "computer";
         $scope.avatarImageUrl2 = "img/computer.png";
+      }
+      else if(theMatch.playersInfo !== undefined){
+      	for(var i = 0; i < theMatch.playersInfo.length; i++){
+      		var p = theMatch.playersInfo[i];
+      		if(p.playerId !== $scope.myPlayerId){
+      			$scope.displayName2 = p.displayName;
+      			$scope.avatarImageUrl2 = p.avatarImageUrl;
+      		}
+      	}
       }
     };
     $scope.updateOpponent();
@@ -221,7 +309,11 @@ myApp.controller('gameCtrl',
       if (matchState.endMatchScores) {
         return "Match ended with scores: " + matchState.endMatchScores;
       }
-      return "Match is ongoing! Turn of player index " + matchState.turnIndex;
+      
+      if (matchState.turnIndex === myTurnIndex)
+        return "Match is ongoing! It is your turn.";
+      else
+        return "Match is ongoing! It is the opponent's turn.";
     };
 
     stateService.setPlayMode($scope.playMode);
@@ -347,6 +439,8 @@ myApp.controller('gameCtrl',
         if (myLastMove === undefined || !isEqual(formatMoveObject(myLastMove), formatMoveObject(matchObj.newMatch.move))) {
           stateService.gotBroadcastUpdateUi(formatStateObject(matchObj.newMatch.move));
         }
+        theMatch = matchObj;
+        $scope.updateOpponent();
       }
     }
 
@@ -362,6 +456,8 @@ myApp.controller('gameCtrl',
               myLastMove = movesObj[movesObj.length - 1];
               numOfMove = numOfMove + 1;
             }
+            theMatch = matchObj[i];
+            $scope.updateOpponent();
           }
         }
       }
@@ -387,6 +483,9 @@ myApp.controller('gameCtrl',
           if (!matchOnGoing) {
             startNewMatch();
             matchOnGoing = true;
+          }
+          else{
+          	checkGameUpdates();
           }
         } else if (message.isMoveOkResult !== undefined) {
           if (message.isMoveOkResult !== true) {
