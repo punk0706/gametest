@@ -1,5 +1,5 @@
 <div class="startDiv">
-	<div style="position:relative;top:10%;display:block;">
+	<div style="position:relative;top:15%;display:block;">
     <div ><img class="centerItem" src={{avatarImageUrl}} alt="HTML5 Icon" width="30%" height="30%"></div>
     <br />
     <div class="centerItem" style="position:relative;width:50%;height:10%;text-align:center;">
@@ -7,7 +7,7 @@
     </div>
     <br />
     <br />
-	<div><button class="btn btn-primary centerItem" ng-click="guestLogin()" style="width:50%;height:15%;font-size:80%;">Login With Another Account</button></div>
+	<div><button class="btn btn-primary centerItem" ng-click="guestLogin()" style="width:50%;height:15%;font-size:90%;">Login With Another Account</button></div>
 	<br />
     <div><select id="gameList" class="nullable btn btn-primary dropdown-toggle centerItem" ng-options="game.gameId as game.gameName for game in availableGames"  ng-model="selectedGame" ng-change="gameSelected()" style="width:50%; font-size:100%;">
       <option value="">Please select a game from list</option>
@@ -15,19 +15,19 @@
     <br />
     <br />
     	<div class="centerItem" style="width:70%">
-    		<tabset justified="true" style="width:100%;font-size:80%">
+    		<tabset justified="true" style="width:100%;font-size:100%">
     			<tab heading="Single Player">
     				<br />
     				<div class="btn-group" style="width:100%">
-       					<label style="width:50%; font-size:80%;" class="btn btn-primary" ng-model="checkModel.left" >Pass N Play</label>
-        				<label style="width:50%; font-size:80%;" class="btn btn-primary" ng-model="checkModel.middle" >Play With Computer</label>
+       					<label style="width:50%; font-size:90%;" class="btn btn-primary" ng-model="checkModel.left" >Pass N Play</label>
+        				<label style="width:50%; font-size:90%;" class="btn btn-primary" ng-model="checkModel.middle" >Play With Computer</label>
     				</div></tab>
     			<tab heading="Play Online">
     				<br />
     				<div class="btn-group" style="width:100%">
-       					<label style="width:30%; font-size:80%;" class="btn btn-primary" ng-model="checkModel.left" >New Match</label>
-        				<label style="width:40%; font-size:80%;" class="btn btn-primary" ng-model="checkModel.middle" >Find Auto Match</label>
-        				<label style="width:30%; font-size:80%;" class="btn btn-primary" ng-model="checkModel.right" >Match List</label>
+       					<label style="width:30%; font-size:90%;" class="btn btn-primary" ng-model="checkModel.left" >New Match</label>
+        				<label style="width:40%; font-size:90%;" class="btn btn-primary" ng-model="checkModel.middle" >Find Auto Match</label>
+        				<label style="width:30%; font-size:90%;" class="btn btn-primary" ng-model="checkModel.right" >Match List</label>
     				</div>
     			</tab>
  			 </tabset>
