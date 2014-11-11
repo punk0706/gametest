@@ -1,14 +1,17 @@
-<div class="startDiv">
-	<div style="position:relative;top:10%;display:block;">
-		<div class="centerItem" style="width:70%;height70%;">
+<div class="startDiv" style="width:100%;height:100%;">
+	<div style="position:relative;top:10%;display:block;width:100%;height:90%;">
+		<div class="centerItem" style="width:70%;height80%;">
     		<tabset justified="true">
     			<tab heading="Match List" >
     				<br />
-    				<div style="width:100%;height:500px;font-size:80%;overflow:auto;">
+    				<div>
+    				<div ng-style="matchListStyle">
     				<div class="centerItem" ng-model="btTest" ng-repeat="test in btTest" style="position:relative;width:90%;height15%;">
-    				<button class="btn btn-default btn-sm" style="width:100%;">{{test.o}}</button>
+    				<button class="btn btn-success btn-sm" style="width:100%;">{{test.o}}</button>
     				<div>&nbsp;</div>
 					</div>
+					</div>
+						<button class="btn btn-primary centerItem" ng-click="resumeMatch(match)" style="width:50%;height:15%;font-size:90%"">Join Game</button>
 					</div>
     			</tab>	
     			<tab heading="Current Game">

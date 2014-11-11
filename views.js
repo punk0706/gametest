@@ -171,6 +171,11 @@ myApp.controller('loginCtrl', function($routeParams, $location, $scope, $rootSco
 
 myApp.controller('modeCtrl', function($routeParams, $location, $scope, $rootScope, $log, $window, platformMessageService, stateService, serverApiService, platformScaleService, interComService) {
   this.name = "modeCtrl";
+  $scope.matchListStyle = {
+  	"width" : "100%",
+  	"height" : Math.floor(($window.innerHeight*0.6)).toString()+"px",
+  	"overflow": "auto"
+  }
   if (interComService.getUser() === undefined || interComService.getGame() === undefined){
   	$location.path('/');
   }
