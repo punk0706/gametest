@@ -1,25 +1,45 @@
 'use strict';
 
 angular.module('myApp')
-.service('interComService', function($window, $timeout, $log, $rootScope) {
+.service('interComService', function($window, $interval, $timeout, $log, $rootScope) {
 
 	var user = {};
 	var game = {}
 	var match = {};
 	var playMode;
 	var gameList = [];
+	var gameMessagerStarted = false;
+	var serviceTimer;
+	var timerStarted = false;
+	
+	function isMessagerStarted(){
+		return gameMessagerStarted;
+	}
+	function messagerStarted(){
+		gameMessagerStarted = true;
+	}
+	function registerTimer(timer){
+		serviceTimer = timer;
+	}
+	function resetTimer(){
+		$interval.cancel(serviceTimer);
+		timerStarted = false;
+	}
+	function isTimerStarted(){
+		return timerStarted;
+	}
 	function setUser(obj){
 		if (obj.displayName !== undefined){
 			user.displayName = obj.displayName;
 		}
-		if (obj.playerId !== undefined){
-			user.playerId = obj.playerId;
+		if (obj.myPlayerId !== undefined){
+			user.myPlayerId = obj.myPlayerId;
 		}
 		if (obj.accessSignature !== undefined){
 			user.accessSignature = obj.accessSignature;
 		}
-		if (obj.avartarUrl !== undefined){
-			user.avartarUrl = obj.avartarUrl;
+		if (obj.avatarImageUrl !== undefined){
+			user.avatarImageUrl = obj.avatarImageUrl;
 		}
 	}
 	function setGame(obj){
@@ -70,4 +90,9 @@ angular.module('myApp')
 	this.getMatch = getMatch;
 	this.getMode = getMode;
 	this.getGameList = getGameList;
+	this.isMessagerStarted = isMessagerStarted;
+	this.messagerStarted = messagerStarted
+	this.registerTimer = registerTimer;
+	this.resetTimer = resetTimer;
+	this.isTimerStarted = isTimerStarted;
 });
