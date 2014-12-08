@@ -5,10 +5,10 @@
         versionCode = "7"
         version     = "1.0.0" >
 
-    <name>Gaming Platform</name>
+    <name>Gomoku Online</name>
 
     <description>
-        A multiplayer game platform.
+        An online, player vs player or player vs computer gomoku game.
     </description>
 
     <author href="www.nyu.edu" email="AUTHOR_NAME@gmail.com">
