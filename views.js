@@ -109,7 +109,25 @@ myApp.controller('loginCtrl', function($routeParams, $location, $interval, $scop
     	guestLogin();
     }
   }
-
+  
+  $scope.fbLogin = function(){
+    FB.getLoginStatus(fbCallback);
+  }
+  
+  function fbCallback(response){
+  	console.log(response);
+  	$scope.fbAccessToken = response.authResponse.accessToken;
+    var obj = [ // SOCIAL_LOGIN - MERGE ACCOUNTS
+                    {
+                      socialLogin: {
+                        accessToken: $scope.fbAccessToken,
+                        uniqueType: "F"
+                      }
+                    }
+    ];
+    sendServerMessage('FB_LOGIN', obj);
+  }
+  
   function guestLogin() {
     var avatarLs = ["bat", "devil", "mike", "scream", "squash"];
     var rand = Math.floor(Math.random() * 5);
@@ -136,6 +154,9 @@ myApp.controller('loginCtrl', function($routeParams, $location, $interval, $scop
       updateGameList(resObj);
     } else if (type === 'REGISTER_PLAYER') {
       updatePlayerInfo(resObj);
+    } else if (type === 'FB_LOGIN') {
+      updatePlayerInfo(resObj);
+      //updateFBInfo(resObj);
     }
   }
 
