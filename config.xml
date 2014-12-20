@@ -5,7 +5,7 @@
         versionCode = "7"
         version     = "1.0.0" >
 
-    <name>Gomoku Online</name>
+    <name>GomokuOnline</name>
 
     <description>
         An online player vs player/player vs AI Gomoku Game

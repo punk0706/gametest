@@ -109,7 +109,6 @@ myApp.controller('loginCtrl', function($routeParams, $location, $interval, $scop
     	guestLogin();
     }
   }
-  
   $scope.fbLogin = function(){
     FB.getLoginStatus(fbCallback);
   }
