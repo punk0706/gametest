@@ -92,6 +92,7 @@ window.onNotification = function (e) {
 
 window.sendMessageToPlatform = function (message) {
   alert("sendMessageToPlatform:" + JSON.stringify(message));
+  window.parent.postMessage(message, "*");
   //window.document.getElementById("platform_iframe").contentWindow.postMessage(message, "*");
 }
 window.sendToken = function (token, error) {
