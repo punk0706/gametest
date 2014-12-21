@@ -142,6 +142,7 @@ myApp.controller('loginCtrl', function($routeParams, $location, $interval, $scop
       );
     }
     var access_token = getJsonFromUrl().access_token;
+    alert('access token is:' + access_token);
     if (access_token) {
       testFbAPI(access_token);
     }
@@ -150,6 +151,7 @@ myApp.controller('loginCtrl', function($routeParams, $location, $interval, $scop
   }
   
   function fbCallback(response){
+  	alert('response is:' + response)
   	console.log(response);
   	$scope.fbAccessToken = response.authResponse.accessToken;
     var obj = [ // SOCIAL_LOGIN - MERGE ACCOUNTS
