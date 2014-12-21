@@ -135,11 +135,12 @@ myApp.controller('loginCtrl', function($routeParams, $location, $interval, $scop
     	xmlhttp.send();
     }
     function testFbAPI(access_token) {
-      makeAjaxCall(
-        "https://graph.facebook.com/v2.2/me?format=json&method=get&pretty=0&suppress_http_code=1&access_token="
-          + access_token,
-        fbCallback(response)
-      );
+      //makeAjaxCall(
+        //"https://graph.facebook.com/v2.2/me?format=json&method=get&pretty=0&suppress_http_code=1&access_token="
+          //+ access_token,
+        //fbCallback(response)
+      //);
+      fbCallback(access_token);
     }
     var access_token = getJsonFromUrl().access_token;
     alert('access token is:' + access_token);
@@ -150,10 +151,10 @@ myApp.controller('loginCtrl', function($routeParams, $location, $interval, $scop
     FB.getLoginStatus(fbCallback);
   }
   
-  function fbCallback(response){
-  	alert('response is:' + response)
-  	console.log(response);
-  	$scope.fbAccessToken = response.authResponse.accessToken;
+  function fbCallback(token){
+  	//alert('response is:' + response)
+  	//console.log(response);
+  	$scope.fbAccessToken = token;
     var obj = [ // SOCIAL_LOGIN - MERGE ACCOUNTS
                     {
                       socialLogin: {
