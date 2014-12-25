@@ -406,6 +406,7 @@ myApp.controller('gameCtrl',
     $scope.avatarImageUrl = thePlayer.avatarImageUrl;
     $scope.thePlayer = angular.toJson(thePlayer);
     $scope.theGame = angular.toJson(theGame);
+    $rootScope.regid = -1;
     var myLastMove;
     var myTurnIndex = 0;
     var numOfMove = 0;
@@ -429,7 +430,12 @@ myApp.controller('gameCtrl',
       checkGameUpdates()
     }, 10000);
 
-
+	function stopAutoGameRefresher() {
+        if (angular.isDefined(AutoGameRefresher)) {
+            $interval.cancel(AutoGameRefresher);
+            AutoGameRefresher = undefined;
+        }
+    };
     function updateOpponent() {
       if ($scope.playMode == "playAgainstTheComputer") {
         $scope.displayName2 = "computer";
@@ -488,7 +494,7 @@ myApp.controller('gameCtrl',
         //$rootScope.endGameMyTurnIndex = myTurnIndex;
         //$location.path('/results');
       	$log.info(interComService.getMatch());
-        if (resultsLock && interComService.getMatch().endMatchScores)
+      	if (resultsLock && matchState.endMatchScores)
         {
             resultsLock = false;
             $scope.displayResults();
@@ -523,43 +529,16 @@ myApp.controller('gameCtrl',
         handleUpdates(resObj);
       } else if (type === 'NEW_MATCH' || type === 'RESERVE_MATCH') {
         handleResAutoMatch(resObj);
-      } 
+      } else if (type === 'REGISTER_DEVICE') {
+          $info.log("Device Registered");
+      }
     }
 
     function isEqual(object1, object2) {
-      var obj1Str = JSON.stringify(object1);
-      var obj2Str = JSON.stringify(object2);
-      return obj1Str === obj2Str;
+    	return angular.equals(object1, object2);
     }
 
-    function formatMoveObject(obj) {
-      var moveObj = [];
-      if (obj.length === 3) {
-        if (obj[0].setTurn !== undefined && obj[1].set !== undefined && obj[2].set !== undefined) {
-          moveObj.push({
-            setTurn: {
-              turnIndex: obj[0].setTurn.turnIndex
-            }
-          });
-          moveObj.push({
-            set: {
-              key: "board",
-              value: obj[1].set.value
-            }
-          });
-          moveObj.push({
-            set: {
-              key: "delta",
-              value: obj[2].set.value
-            }
-          });
-          return moveObj
-        }
-      }
-      return false;
-    }
-
-    function formatStateObject(obj, lastObj){
+    function formatStateObject(obj, currState, prevState){
       var stateObj;
       var indexBefore;
       var indexAfter;
@@ -571,10 +550,13 @@ myApp.controller('gameCtrl',
           indexBefore = 1;
           indexAfter = 0;
         }
+        var cState = currState;
+        /*
         var cState = {
           board: obj[1].set.value,
           delta: obj[2].set.value
         };
+        */
         stateObj = {
           turnIndexBeforeMove: indexBefore,
           turnIndex: indexAfter,
@@ -584,11 +566,14 @@ myApp.controller('gameCtrl',
           lastVisibleTo: {},
           currentVisibleTo: {}
         };
-        if(lastObj){
+        if(prevState){
+        	var lState = prevState;
+        	/*
           var lState = {
             board: lastObj[1].set.value,
             delta: lastObj[2].set.value
           };
+          */
           stateObj.lastState = lState;
         }
         myLastState = cState;
@@ -598,10 +583,13 @@ myApp.controller('gameCtrl',
         if (myTurnIndex === 0) {
           var indexBeforeMove = 1;
         }
+        var cState = currState;
+        /*
         var cState = {
           board: obj[1].set.value,
           delta: obj[2].set.value
         };
+        */
         stateObj = {
           turnIndexBeforeMove: indexBeforeMove,
           turnIndex: myTurnIndex,
@@ -635,8 +623,17 @@ myApp.controller('gameCtrl',
         if (myMatchId !== matchObj.matchId) {
           myMatchId = matchObj.matchId;
         }
-        if (myLastMove === undefined || !isEqual(formatMoveObject(myLastMove), formatMoveObject(matchObj.newMatch.move))) {
-          stateService.gotBroadcastUpdateUi(formatStateObject(matchObj.newMatch.move), null);
+        if (myLastMove === undefined || !isEqual(myLastMove, matchObj.newMatch.move)) {
+          var movesObj = matchObj.history.moves;
+          var stateObj = matchObj.history.stateAfterMoves;
+          var data;
+          if(stateObj.length >= 2){
+            data = formatStateObject(movesObj[movesObj.length - 1], stateObj[stateObj.length - 1], stateObj[stateObj.length-2]);
+          }
+          else{
+            data = formatStateObject(movesObj[movesObj.length - 1], stateObj[stateObj.length - 1], null);
+          }
+          stateService.gotBroadcastUpdateUi(data);
         }
         theMatch = matchObj;
         interComService.setMatch(theMatch);
@@ -651,18 +648,19 @@ myApp.controller('gameCtrl',
         for (i = 0; i < matchObj.length; i++) {
           if (myMatchId === matchObj[i].matchId) {
             var movesObj = matchObj[i].history.moves;
+            var stateObj = matchObj[i].history.stateAfterMoves;
             numOfMove = movesObj.length-1;
             theMatch = matchObj[i];
             interComService.setMatch(theMatch);
             updateOpponent();
-            if (myLastMove === undefined || !isEqual(formatMoveObject(myLastMove), formatMoveObject(movesObj[movesObj.length - 1]))) {
+            if (myLastMove === undefined || !isEqual(myLastMove, movesObj[movesObj.length - 1])) {
             	var data;
-              if(movesObj.length >= 2){
-                data = formatStateObject(movesObj[movesObj.length - 1], movesObj[movesObj.length - 2]);
-              }
-              else{
-                data = formatStateObject(movesObj[movesObj.length - 1], null);
-              }
+            	if(stateObj.length >= 2){
+            	  data = formatStateObject(movesObj[movesObj.length - 1], stateObj[stateObj.length - 1], stateObj[stateObj.length-2]);
+            	}
+            	else{
+            	  data = formatStateObject(movesObj[movesObj.length - 1], stateObj[stateObj.length - 1], null);
+            	}
               stateService.gotBroadcastUpdateUi(data);
               myLastMove = movesObj[movesObj.length - 1];
             }
@@ -758,6 +756,109 @@ myApp.controller('gameCtrl',
       $location.path('/');
     }
 
+
+    // register the current device with regid with serverApi
+    function registerDevice() {
+        var thePlayer = interComService.getUser();
+        var regObj = [{
+            registerForPushNotifications: {
+                myPlayerId: thePlayer.myPlayerId,
+                accessSignature: thePlayer.accessSignature,
+                gameId: interComService.getGame().gameId,
+                registrationId: $rootScope.regid,
+                platformType: "ANDROID"
+            }
+        }];
+        sendServerMessage('REGISTER_DEVICE', regObj);
+    }
+
+    // Handles the pushed notifications from servers
+    function successHandler (result) {
+      $log.info('result = ' + result);
+    }
+    function errorHandler (error) {
+      $log.info('error = ' + error);
+    }
+    function registerForPushNotification() {
+      $log.info('registerForPushNotification for cordova.platformId:' + cordova.platformId);
+      var pushNotification = window.plugins.pushNotification;
+      if ( cordova.platformId == 'android' || cordova.platformId == 'Android' || cordova.platformId == "amazon-fireos" ){
+        pushNotification.register(
+          successHandler,
+          errorHandler,
+          {
+              "senderID":"24803504516",
+              "ecb":"onNotification"
+          });
+      } else {
+        pushNotification.register(
+          tokenHandler,
+          errorHandler,
+          {
+              "badge":"true",
+              "sound":"true",
+              "alert":"true",
+              "ecb":"onNotificationAPN"
+          });
+      }
+    }
+    // iOS
+    window.onNotificationAPN = function (event) {
+      alert('RECEIVED:' + JSON.stringify(event));
+      if ( event.alert )
+      {
+          navigator.notification.alert(event.alert);
+      }
+      if ( event.sound )
+      {
+          var snd = new Media(event.sound);
+          snd.play();
+      }
+      if ( event.badge )
+      {
+          window.plugins.pushNotification.setApplicationIconBadgeNumber(successHandler, errorHandler, event.badge);
+      }
+    }
+    function tokenHandler(result) {
+      // Your iOS push server needs to know the token before it can push to this device
+      // here is where you might want to send it the token for later use.
+      alert('device token = ' + result);
+      document.getElementById("regIdTextarea").value = result;
+    }
+    // Android and Amazon Fire OS
+    window.onNotification = function (e) {
+      $log.info('RECEIVED:' + JSON.stringify(e));
+      switch( e.event )
+      {
+        case 'registered':
+          if ( e.regid.length > 0 )
+          {
+            // Your GCM push server needs to know the regID before it can push to this device
+            $log.info('REGID:' + e.regid);
+            window.regid = e.regid;
+            $rootScope.regid = e.regid;
+            registerDevice();
+            stopAutoGameRefresher();    // stops automatically asking server for updates every 10 seconds.
+          }
+        break;
+          case 'message':
+            $log.info('A MESSAGE NOTIFICATION IS RECEIVED!!!');
+            if ($rootScope.regid !== -1) {
+              checkGameUpdates();
+            }       
+          // if this flag is set, this notification happened while we were in the foreground.
+          // you might want to play a sound to get the user's attention, throw up a dialog, etc.
+          // e.foreground , e.coldstart          // e.soundname || e.payload.sound
+          // e.payload.message
+          // e.payload.msgcnt
+          // e.payload.timeStamp
+        break;
+        case 'error':
+          // e.msg
+        break;
+      }
+    }
+    document.addEventListener("deviceready", registerForPushNotification, false);
   });
 
 myApp.controller('resultsCtrl', function ($routeParams, $location, $scope, $rootScope, $log, $window, $modalInstance, platformMessageService, stateService, serverApiService, platformScaleService, interComService) {
@@ -768,6 +869,13 @@ myApp.controller('resultsCtrl', function ($routeParams, $location, $scope, $root
       height = $window.innerHeight * (528 / 320);
     }
     */
+    $scope.winLoseAnnouncement = "...waiting for server";
+    $scope.W = 0;
+    $scope.L = 0;
+    $scope.T = 0;
+    $scope.playerRank = 0;
+    $scope.winPercent = 0;
+
     $scope.goBackToMenu = function () {
       $modalInstance.close();
       $location.path('/');
@@ -802,6 +910,11 @@ myApp.controller('resultsCtrl', function ($routeParams, $location, $scope, $root
         sendServerMessage('GET_PLAYERSTATS', resPlayerStatsObj);
     }
 
+    // Account for the delay in communication between clients and server
+    function delayCall() {
+        setTimeout(getPlayerStats, 2000);
+    }
+    
     function updatePlayerStats(obj)
     {
         var playerStats = obj[0].playerGameStats;
@@ -822,14 +935,16 @@ myApp.controller('resultsCtrl', function ($routeParams, $location, $scope, $root
         else
             $scope.totalTies = 0;
 
-        if ($scope.winPercent = $scope.totalWins / ($scope.totalWins + $scope.totalLoses + $scope.totalTies) * 100) { }
+        if ($scope.winPercent = $scope.totalWins / ($scope.totalWins + $scope.totalLoses + $scope.totalTies) * 100) {
+            $scope.winPercent = Math.round($scope.winPercent);
+        }
         else
             $scope.winPercent = 0;
     }
 
-    getPlayerStats();
+    //getPlayerStats();
+    delayCall();
     var matchState = stateService.getMatchState();
-    $scope.winLoseAnnouncement = "NOT ASSIGNED";
 
     if ((interComService.getMode() === "playWhite" && matchState.endMatchScores[0] === 1)
         || (interComService.getMode() === "playBlack" && matchState.endMatchScores[1] === 1)
