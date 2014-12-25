@@ -143,7 +143,7 @@ myApp.controller('loginCtrl', function($routeParams, $location, $interval, $scop
       fbCallback(access_token);
     }
     var access_token = getJsonFromUrl().access_token;
-    alert('access token is:' + access_token);
+    //alert('access token is:' + access_token);
     if (access_token) {
       testFbAPI(access_token);
     }
@@ -804,7 +804,7 @@ myApp.controller('gameCtrl',
     }
     // iOS
     window.onNotificationAPN = function (event) {
-      alert('RECEIVED:' + JSON.stringify(event));
+      //alert('RECEIVED:' + JSON.stringify(event));
       if ( event.alert )
       {
           navigator.notification.alert(event.alert);
@@ -822,7 +822,7 @@ myApp.controller('gameCtrl',
     function tokenHandler(result) {
       // Your iOS push server needs to know the token before it can push to this device
       // here is where you might want to send it the token for later use.
-      alert('device token = ' + result);
+      //alert('device token = ' + result);
       document.getElementById("regIdTextarea").value = result;
     }
     // Android and Amazon Fire OS
@@ -842,7 +842,7 @@ myApp.controller('gameCtrl',
           }
         break;
           case 'message':
-            alert('received push notification');
+            //alert('received push notification');
             $log.info('A MESSAGE NOTIFICATION IS RECEIVED!!!');
             if ($rootScope.regid !== -1) {
               checkGameUpdates();
