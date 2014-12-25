@@ -842,6 +842,7 @@ myApp.controller('gameCtrl',
           }
         break;
           case 'message':
+            alert("received push notification");
             $log.info('A MESSAGE NOTIFICATION IS RECEIVED!!!');
             if ($rootScope.regid !== -1) {
               checkGameUpdates();
