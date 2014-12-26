@@ -774,6 +774,7 @@ myApp.controller('gameCtrl',
 
     // Handles the pushed notifications from servers
     function successHandler (result) {
+      alert('result = ' + result);
       $log.info('result = ' + result);
     }
     function errorHandler (error) {
