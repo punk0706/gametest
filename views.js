@@ -647,7 +647,7 @@ myApp.controller('gameCtrl',
         for (i = 0; i < matchObj.length; i++) {
           if (myMatchId === matchObj[i].matchId) {
           	if (matchObj[i].endMatchReason && matchObj[i].endMatchReason === 'DISMISSED' && matchObj[i].endMatchScores){
-          		var movesObj = {endMatch: {endMatchScores: matchObj[i].endMatchScores}};
+          		var movesObj = [{endMatch: {endMatchScores: matchObj[i].endMatchScores}}];
           		var stateObj = matchObj[i].history.stateAfterMoves;
           		var data;
           		if(stateObj.length >= 2){
