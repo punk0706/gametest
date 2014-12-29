@@ -26,6 +26,11 @@ myApp.config(['$routeProvider', '$locationProvider',
         controllerAs: 'loginCtrl'
         	
       })
+      .when('/accessToken/:accessToken', {
+        templateUrl: 'login.html',
+        controller: 'loginCtrl',
+        controllerAs: 'loginCtrl'
+      })
       .when('/index.html', {
         templateUrl: 'login.html',
         controller: 'loginCtrl'
@@ -79,6 +84,7 @@ myApp.controller('loginCtrl', function($routeParams, $location, $interval, $scop
   var playerInfo = null;
 
   getGames();
+  fbLogin($routeParams.accessToken);
   updatePlayer();
 
   $scope.guestLogin = guestLogin;
@@ -98,63 +104,40 @@ myApp.controller('loginCtrl', function($routeParams, $location, $interval, $scop
   };
 
   function updatePlayer() {
-    if (typeof(Storage) != "undefined") {
+    if (typeof(Storage) != "undefined" && localStorage.getItem("playerInfo") != "undefined") {
       playerInfo = angular.fromJson(localStorage.getItem("playerInfo"));
     }
-    if (playerInfo != null) {
+    if (playerInfo) {
     	$scope.playerInfo = playerInfo;
       interComService.setUser(playerInfo);
+
     }
     else{
     	guestLogin();
     }
   }
-  function getJsonFromUrl() {
-      if (!location.search || location.search == "") {
-        return {};
-      }
-      var query = location.search.substr(1);
-      var result = {};
-      query.split("&").forEach(function(part) {
-        var item = part.split("=");
-        result[item[0]] = decodeURIComponent(item[1]);
-      });
-      return result;
-    }
-    function makeAjaxCall(url, callback) {
-    	var xmlhttp = new XMLHttpRequest();
-    	xmlhttp.onreadystatechange = function() {
-    	  if (xmlhttp.readyState==4 && xmlhttp.status==200) {
-    	    var responseText = xmlhttp.responseText;
-    	    var response = JSON.parse(responseText);
-          console.log(response);
-    	    callback(response);
-        }
-    	};
-    	xmlhttp.open("GET", url, true);
-    	xmlhttp.send();
-    }
-    function testFbAPI(access_token) {
-      //makeAjaxCall(
-        //"https://graph.facebook.com/v2.2/me?format=json&method=get&pretty=0&suppress_http_code=1&access_token="
-          //+ access_token,
-        //fbCallback(response)
-      //);
-      fbCallback(access_token);
-    }
-    var access_token = getJsonFromUrl().access_token;
-    //alert('access token is:' + access_token);
-    if (access_token) {
-      testFbAPI(access_token);
-    }
+  
+  function fbLogin(accessToken){
+  	if(accessToken){
+    	var obj = [ // SOCIAL_LOGIN - MERGE ACCOUNTS
+    	                {
+    	                  socialLogin: {
+    	                    accessToken: accessToken,
+    	                    uniqueType: "F"
+    	                  }
+    	                }
+    	];
+    	sendServerMessage('FB_LOGIN', obj);
+  	}
+  }
+  
   $scope.fbLogin = function(){
     FB.getLoginStatus(fbCallback);
   }
   
-  function fbCallback(token){
-  	//alert('response is:' + response)
-  	//console.log(response);
-  	$scope.fbAccessToken = token;
+  function fbCallback(response){
+  	console.log(response);
+  	$scope.fbAccessToken = response.authResponse.accessToken;
     var obj = [ // SOCIAL_LOGIN - MERGE ACCOUNTS
                     {
                       socialLogin: {
@@ -193,6 +176,7 @@ myApp.controller('loginCtrl', function($routeParams, $location, $interval, $scop
     } else if (type === 'REGISTER_PLAYER') {
       updatePlayerInfo(resObj);
     } else if (type === 'FB_LOGIN') {
+    	//alert("FB_LOGIN: " + JSON.stringify(resObj));
       updatePlayerInfo(resObj);
       //updateFBInfo(resObj);
     }
@@ -229,6 +213,19 @@ myApp.controller('loginCtrl', function($routeParams, $location, $interval, $scop
     updatePlayer();
   };
 
+  platformMessageService.removeMessageListener();
+  platformMessageService.addMessageListener(function(message) {
+    if (message.token !== undefined) {
+      //alert("get token!!! " + JSON.stringify(message));
+    	console.log("get token!!! " + JSON.stringify(message));
+    	fbLogin(message.token);
+    }
+    else if(message.regid !== undefined){
+    	//alert("get regid: " + message.regid);
+    	console.log("get regid: " + message.regid);
+    	$rootScope.regid = message.regid;
+    }
+  })
 })
 
 myApp.controller('modeCtrl', function($routeParams, $location, $scope, $interval, $rootScope, $log, $window, platformMessageService, stateService, serverApiService, platformScaleService, interComService) {
@@ -406,7 +403,8 @@ myApp.controller('gameCtrl',
     $scope.avatarImageUrl = thePlayer.avatarImageUrl;
     $scope.thePlayer = angular.toJson(thePlayer);
     $scope.theGame = angular.toJson(theGame);
-    $rootScope.regid = -1;
+    //$rootScope.regid = -1;
+    registerDevice();
     var myLastMove;
     var myTurnIndex = 0;
     var numOfMove = 0;
@@ -430,12 +428,13 @@ myApp.controller('gameCtrl',
       checkGameUpdates()
     }, 10000);
 
-	function stopAutoGameRefresher() {
+    function stopAutoGameRefresher() {
         if (angular.isDefined(AutoGameRefresher)) {
             $interval.cancel(AutoGameRefresher);
             AutoGameRefresher = undefined;
         }
     };
+
     function updateOpponent() {
       if ($scope.playMode == "playAgainstTheComputer") {
         $scope.displayName2 = "computer";
@@ -731,6 +730,11 @@ myApp.controller('gameCtrl',
               sendServerMessage('MADE_MOVE', moveObj);
             }
           }
+        } else if(message.notification !== undefined){
+        	console.log("got notification");
+        	//alert("got notification");
+          stopAutoGameRefresher();
+          checkGameUpdates();
         }
       }
     });
@@ -772,95 +776,6 @@ myApp.controller('gameCtrl',
         sendServerMessage('REGISTER_DEVICE', regObj);
     }
 
-    // Handles the pushed notifications from servers
-    function successHandler (result) {
-      //alert('result = ' + result);
-      $log.info('result = ' + result);
-    }
-    function errorHandler (error) {
-      $log.info('error = ' + error);
-    }
-    function registerForPushNotification() {
-      $log.info('registerForPushNotification for cordova.platformId:' + cordova.platformId);
-      var pushNotification = window.plugins.pushNotification;
-      if ( cordova.platformId == 'android' || cordova.platformId == 'Android' || cordova.platformId == "amazon-fireos" ){
-        pushNotification.register(
-          successHandler,
-          errorHandler,
-          {
-              "senderID":"24803504516",
-              "ecb":"onNotification"
-          });
-      } else {
-        pushNotification.register(
-          tokenHandler,
-          errorHandler,
-          {
-              "badge":"true",
-              "sound":"true",
-              "alert":"true",
-              "ecb":"onNotificationAPN"
-          });
-      }
-    }
-    // iOS
-    window.onNotificationAPN = function (event) {
-      //alert('RECEIVED:' + JSON.stringify(event));
-      if ( event.alert )
-      {
-          navigator.notification.alert(event.alert);
-      }
-      if ( event.sound )
-      {
-          var snd = new Media(event.sound);
-          snd.play();
-      }
-      if ( event.badge )
-      {
-          window.plugins.pushNotification.setApplicationIconBadgeNumber(successHandler, errorHandler, event.badge);
-      }
-    }
-    function tokenHandler(result) {
-      // Your iOS push server needs to know the token before it can push to this device
-      // here is where you might want to send it the token for later use.
-      //alert('device token = ' + result);
-      document.getElementById("regIdTextarea").value = result;
-    }
-    // Android and Amazon Fire OS
-    window.onNotification = function (e) {
-      $log.info('RECEIVED:' + JSON.stringify(e));
-      switch( e.event )
-      {
-        case 'registered':
-          if ( e.regid.length > 0 )
-          {
-            // Your GCM push server needs to know the regID before it can push to this device
-            $log.info('REGID:' + e.regid);
-            window.regid = e.regid;
-            $rootScope.regid = e.regid;
-            registerDevice();
-            stopAutoGameRefresher();    // stops automatically asking server for updates every 10 seconds.
-          }
-        break;
-          case 'message':
-            //alert('received push notification');
-            $log.info('A MESSAGE NOTIFICATION IS RECEIVED!!!');
-            if ($rootScope.regid !== -1) {
-              checkGameUpdates();
-            }       
-          // if this flag is set, this notification happened while we were in the foreground.
-          // you might want to play a sound to get the user's attention, throw up a dialog, etc.
-          // e.foreground , e.coldstart          // e.soundname || e.payload.sound
-          // e.payload.message
-          // e.payload.msgcnt
-          // e.payload.timeStamp
-        break;
-        case 'error':
-          // e.msg
-        break;
-      }
-    }
-    document.addEventListener("deviceready", registerForPushNotification, false);
   });
 
 myApp.controller('resultsCtrl', function ($routeParams, $location, $scope, $rootScope, $log, $window, $modalInstance, platformMessageService, stateService, serverApiService, platformScaleService, interComService) {
@@ -871,6 +786,7 @@ myApp.controller('resultsCtrl', function ($routeParams, $location, $scope, $root
       height = $window.innerHeight * (528 / 320);
     }
     */
+
     $scope.winLoseAnnouncement = "...waiting for server";
     $scope.W = 0;
     $scope.L = 0;
@@ -916,7 +832,7 @@ myApp.controller('resultsCtrl', function ($routeParams, $location, $scope, $root
     function delayCall() {
         setTimeout(getPlayerStats, 2000);
     }
-    
+
     function updatePlayerStats(obj)
     {
         var playerStats = obj[0].playerGameStats;
