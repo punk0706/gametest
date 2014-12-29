@@ -623,27 +623,14 @@ myApp.controller('gameCtrl',
           myMatchId = matchObj.matchId;
         }
         if (myLastMove === undefined || !isEqual(myLastMove, matchObj.newMatch.move)) {
-          if (matchObj.endMatchReason && matchObj.endMatchReason === 'DISMISSED' && matchObj.endMatchScores){
-          	var movesObj = {endMatch: {endMatchScores: matchObj.endMatchScores}};
-          	var stateObj = matchObj.history.stateAfterMoves;
-          	var data;
-          	if(stateObj.length >= 2){
-            	data = formatStateObject(movesObj, stateObj[stateObj.length - 1], stateObj[stateObj.length-2]);
-          	}
-          	else{
-            	data = formatStateObject(movesObj, stateObj[stateObj.length - 1], null);
-          	}
+          var movesObj = matchObj.history.moves;
+          var stateObj = matchObj.history.stateAfterMoves;
+          var data;
+          if(stateObj.length >= 2){
+            data = formatStateObject(movesObj[movesObj.length - 1], stateObj[stateObj.length - 1], stateObj[stateObj.length-2]);
           }
           else{
-          	var movesObj = matchObj.history.moves;
-          	var stateObj = matchObj.history.stateAfterMoves;
-          	var data;
-          	if(stateObj.length >= 2){
-            	data = formatStateObject(movesObj[movesObj.length - 1], stateObj[stateObj.length - 1], stateObj[stateObj.length-2]);
-          	}
-          	else{
-            	data = formatStateObject(movesObj[movesObj.length - 1], stateObj[stateObj.length - 1], null);
-          	}
+            data = formatStateObject(movesObj[movesObj.length - 1], stateObj[stateObj.length - 1], null);
           }
           stateService.gotBroadcastUpdateUi(data);
         }
@@ -659,6 +646,19 @@ myApp.controller('gameCtrl',
         var i;
         for (i = 0; i < matchObj.length; i++) {
           if (myMatchId === matchObj[i].matchId) {
+          	if (matchObj.endMatchReason && matchObj.endMatchReason === 'DISMISSED' && matchObj.endMatchScores){
+          		var movesObj = {endMatch: {endMatchScores: matchObj.endMatchScores}};
+          		var stateObj = matchObj.history.stateAfterMoves;
+          		var data;
+          		if(stateObj.length >= 2){
+            		data = formatStateObject(movesObj, stateObj[stateObj.length - 1], stateObj[stateObj.length-2]);
+          		}
+          		else{
+            		data = formatStateObject(movesObj, stateObj[stateObj.length - 1], null);
+          		}
+          		stateService.gotBroadcastUpdateUi(data);
+          	}
+          else{
             var movesObj = matchObj[i].history.moves;
             var stateObj = matchObj[i].history.stateAfterMoves;
             numOfMove = movesObj.length-1;
@@ -675,6 +675,7 @@ myApp.controller('gameCtrl',
             	}
               stateService.gotBroadcastUpdateUi(data);
               myLastMove = movesObj[movesObj.length - 1];
+            }
             }
           }
         }
