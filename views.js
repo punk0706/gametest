@@ -696,7 +696,7 @@ myApp.controller('gameCtrl',
           }
         } else if (message.isMoveOkResult !== undefined) {
           if (message.isMoveOkResult !== true) {
-            $window.alert("isMoveOk returned " + message.isMoveOkResult);
+            //$window.alert("isMoveOk returned " + message.isMoveOkResult);
           }
         } else if (message.makeMove !== undefined) {
           stateService.makeMove(message.makeMove);
